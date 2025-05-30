@@ -27,6 +27,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relation to departments
+  departments UserDepartment[]
+
   @@index([is_active, email, external_id])
 }
 
@@ -47,6 +50,51 @@ enum Role {
 }
 
 // ==========================================
+// Department Model
+// ==========================================
+
+model Department {
+  id          Int            @id @default(autoincrement())
+  name        String
+  slug        DepartmentSlug @unique @default(other)
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relation to users
+  users UserDepartment[]
+
+  @@map("departments") // Explicit table name
+}
+
+enum DepartmentSlug {
+  sales
+  marketing
+  finance
+  hr
+  operations
+  legal
+  customer_support
+  other
+}
+
 // Ticket Model
 // ==========================================
 
+model Ticket {
+  id Int @id @default(autoincrement())
+}
+
+// Join table for User-Department many-to-many relation
+model UserDepartment {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  departmentId Int
+  user         User       @relation(fields: [userId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
+  joinedAt     DateTime   @default(now())
+
+  @@unique([userId, departmentId])
+  @@index([userId])
+  @@index([departmentId])
+}
