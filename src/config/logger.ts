@@ -13,11 +13,19 @@ export const logger = winston.createLogger({
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     logFormat
   ),
-  transports: [],
+  transports: [
+    new winston.transports.Console({
+      format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        logFormat
+      ),
+    })
+  ]
 });
 
-// Add file transports only in production
-if (process.env.NODE_ENV === 'production') {
+// Add file transports only in local development
+if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
   logger.add(new winston.transports.File({ 
     filename: 'logs/error.log', 
     level: 'error',
@@ -28,15 +36,6 @@ if (process.env.NODE_ENV === 'production') {
     filename: 'logs/combined.log',
     maxsize: 5242880, // 5MB
     maxFiles: 5,
-  }));
-} else {
-  // Add console transport for non-production environments
-  logger.add(new winston.transports.Console({
-    format: combine(
-      colorize(),
-      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      logFormat
-    ),
   }));
 }
 
