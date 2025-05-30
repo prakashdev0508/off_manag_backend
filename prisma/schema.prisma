@@ -30,6 +30,10 @@ model User {
   // Relation to departments
   departments UserDepartment[]
 
+  // Relation to tickets
+  tickets          Ticket[]
+  ticket_histories TicketHistory[]
+
   @@index([is_active, email, external_id])
 }
 
@@ -64,6 +68,8 @@ model Department {
   // Relation to users
   users UserDepartment[]
 
+  tickets Ticket[]
+
   @@map("departments") // Explicit table name
 }
 
@@ -78,13 +84,6 @@ enum DepartmentSlug {
   other
 }
 
-// Ticket Model
-// ==========================================
-
-model Ticket {
-  id Int @id @default(autoincrement())
-}
-
 // Join table for User-Department many-to-many relation
 model UserDepartment {
   id           Int        @id @default(autoincrement())
@@ -97,4 +96,66 @@ model UserDepartment {
   @@unique([userId, departmentId])
   @@index([userId])
   @@index([departmentId])
+}
+
+// ==========================================
+// Ticket Model
+// ==========================================
+
+model Ticket {
+  id          Int     @id @default(autoincrement())
+  description String?
+
+  status   TicketStatus   @default(open)
+  priority TicketPriority @default(medium)
+  category TicketCategory @default(other)
+
+  property_id Int?
+  image_links String[]
+  history     TicketHistory[]
+
+  created_by      Int
+  created_by_user User @relation(fields: [created_by], references: [id])
+
+  department_id Int?
+  department    Department? @relation(fields: [department_id], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([department_id])
+  @@index([property_id])
+}
+
+model TicketHistory {
+  id        Int      @id @default(autoincrement())
+  ticket_id Int
+  ticket    Ticket   @relation(fields: [ticket_id], references: [id])
+  user_id   Int
+  user      User     @relation(fields: [user_id], references: [id])
+  old_value String?
+  new_value String?
+  field     String?
+  createdAt DateTime @default(now())
+}
+
+enum TicketStatus {
+  open
+  closed
+  in_progress
+  pending
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+}
+
+enum TicketCategory {
+  bug
+  feature_request
+  question
+  operations
+  other
 }
