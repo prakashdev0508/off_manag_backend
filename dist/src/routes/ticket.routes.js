@@ -6,4 +6,6 @@ const authentication_1 = require("../middleware/authentication");
 const router = (0, express_1.Router)();
 router.post("/create", authentication_1.verifyToken, ticket_controller_1.createTicket);
 router.get("/", authentication_1.verifyToken, ticket_controller_1.getAllTickets);
+router.put("/:id", authentication_1.verifyToken, ticket_controller_1.updateTicket);
+router.get("/:id", authentication_1.verifyToken, ticket_controller_1.getTicketById);
 exports.default = router;
