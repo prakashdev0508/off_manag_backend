@@ -34,7 +34,7 @@ exports.app.use((0, helmet_1.default)({
 }));
 // CORS configuration
 exports.app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
