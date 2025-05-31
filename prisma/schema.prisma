@@ -115,6 +115,7 @@ model Ticket {
   cluster_id  Int?
   attachments String[]
   history     TicketHistory[]
+  external_links String[]
 
   created_by      Int
   created_by_user User @relation(fields: [created_by], references: [id])
