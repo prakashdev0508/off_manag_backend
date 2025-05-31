@@ -111,7 +111,9 @@ model Ticket {
   category TicketCategory @default(other)
 
   property_id Int?
-  image_links String[]
+  city_name   String?
+  cluster_id  Int?
+  attachments String[]
   history     TicketHistory[]
 
   created_by      Int
@@ -123,7 +125,7 @@ model Ticket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([department_id])
+  @@index([department_id, created_by])
   @@index([property_id])
 }
 
