@@ -19,13 +19,21 @@ model User {
   external_id    String
   manager_id     String?
 
-  user_type UserType @default(employee)
-  roles     Role[]
+  user_type           UserType @default(employee)
+  roles               Role[]
+  assigned_properties Int[]
 
   is_active Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relation to departments
+  departments UserDepartment[]
+
+  // Relation to tickets
+  tickets          Ticket[]
+  ticket_histories TicketHistory[]
 
   @@index([is_active, email, external_id])
 }
@@ -47,6 +55,111 @@ enum Role {
 }
 
 // ==========================================
+// Department Model
+// ==========================================
+
+model Department {
+  id          Int            @id @default(autoincrement())
+  name        String
+  slug        DepartmentSlug @unique @default(other)
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relation to users
+  users UserDepartment[]
+
+  tickets Ticket[]
+
+  @@map("departments") // Explicit table name
+}
+
+enum DepartmentSlug {
+  sales
+  marketing
+  finance
+  hr
+  operations
+  legal
+  customer_support
+  other
+}
+
+// Join table for User-Department many-to-many relation
+model UserDepartment {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  departmentId Int
+  user         User       @relation(fields: [userId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
+  joinedAt     DateTime   @default(now())
+
+  @@unique([userId, departmentId])
+  @@index([userId])
+  @@index([departmentId])
+}
+
+// ==========================================
 // Ticket Model
 // ==========================================
 
+model Ticket {
+  id          Int     @id @default(autoincrement())
+  description String?
+
+  status   TicketStatus   @default(open)
+  priority TicketPriority @default(medium)
+  category TicketCategory @default(other)
+
+  property_id    Int?
+  city_name      String?
+  cluster_id     Int?
+  attachments    String[]
+  history        TicketHistory[]
+  external_links String[]
+
+  created_by      Int
+  created_by_user User @relation(fields: [created_by], references: [id])
+
+  department_id Int?
+  department    Department? @relation(fields: [department_id], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([department_id, created_by])
+  @@index([property_id])
+}
+
+model TicketHistory {
+  id        Int      @id @default(autoincrement())
+  ticket_id Int
+  ticket    Ticket   @relation(fields: [ticket_id], references: [id])
+  user_id   Int
+  user      User     @relation(fields: [user_id], references: [id])
+  old_value String?
+  new_value String?
+  field     String?
+  createdAt DateTime @default(now())
+}
+
+enum TicketStatus {
+  open
+  closed
+  in_progress
+  pending
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+}
+
+enum TicketCategory {
+  bug
+  feature_request
+  question
+  operations
+  other
+}
