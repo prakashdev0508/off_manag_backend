@@ -71,6 +71,9 @@ export const getAllTickets = async (
       cluster_id,
     } = req.query;
 
+    const { by_me } = req.body;
+    const user = res.locals.user;
+
     // Build where conditions for filtering
     const whereConditions: Prisma.TicketWhereInput = {
       AND: [
@@ -90,6 +93,10 @@ export const getAllTickets = async (
         cluster_id ? { cluster_id: Number(cluster_id) } : {},
       ],
     };
+
+    if (by_me) {
+      whereConditions.created_by = user.id;
+    }
 
     // Build order by condition
     const orderBy: Prisma.TicketOrderByWithRelationInput = {
