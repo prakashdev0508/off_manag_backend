@@ -36,10 +36,12 @@ app.use(
 // CORS configuration
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: true,
+    methods: "*",
+    allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
     credentials: true,
+    maxAge: 86400,
   })
 );
 
