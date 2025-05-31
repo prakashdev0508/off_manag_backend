@@ -34,10 +34,12 @@ exports.app.use((0, helmet_1.default)({
 }));
 // CORS configuration
 exports.app.use((0, cors_1.default)({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: true,
+    methods: "*",
+    allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
     credentials: true,
+    maxAge: 86400,
 }));
 // Rate limiting
 const limiter = (0, express_rate_limit_1.default)({
