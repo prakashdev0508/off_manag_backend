@@ -7,6 +7,7 @@ import {
   TicketPriority,
   TicketCategory,
   TicketStatus,
+  Role,
 } from "@prisma/client";
 
 export const createTicket = async (
@@ -46,7 +47,7 @@ export const createTicket = async (
 
     createSuccess(res, "Ticket created successfully", { id: ticket.id });
   } catch (error: any) {
-    next(createError(500, error.message || "Failed to create ticket"));
+    next(createError(500, error || "Failed to create ticket"));
   }
 };
 
@@ -75,24 +76,48 @@ export const getAllTickets = async (
     const user = res.locals.user;
 
     // Build where conditions for filtering
-    const whereConditions: Prisma.TicketWhereInput = {
-      AND: [
-        search
-          ? {
-              description: { contains: String(search), mode: "insensitive" },
-            }
-          : {},
-        priority ? { priority: priority as TicketPriority } : {},
-        category ? { category: category as TicketCategory } : {},
-        department_id ? { department_id: Number(department_id) } : {},
-        status ? { status: status as TicketStatus } : {},
-        property_id ? { property_id: Number(property_id) } : {},
-        city_name
-          ? { city_name: (city_name as string).trim().toLowerCase() }
-          : {},
-        cluster_id ? { cluster_id: Number(cluster_id) } : {},
-      ],
-    };
+    const whereConditions: Prisma.TicketWhereInput = {};
+    whereConditions.AND = [
+      search
+        ? {
+            description: { contains: String(search), mode: "insensitive" },
+          }
+        : {},
+      priority ? { priority: priority as TicketPriority } : {},
+      category ? { category: category as TicketCategory } : {},
+      department_id ? { department_id: Number(department_id) } : {},
+      status ? { status: status as TicketStatus } : {},
+      property_id ? { property_id: Number(property_id) } : {},
+      city_name
+        ? { city_name: (city_name as string).trim().toLowerCase() }
+        : {},
+      cluster_id ? { cluster_id: Number(cluster_id) } : {},
+    ];
+
+    // Check if user is not super_admin or admin
+    if (
+      !user.roles.includes(Role.super_admin) &&
+      !user.roles.includes(Role.admin)
+    ) {
+      // First check assigned properties
+      if (user.assigned_properties && user.assigned_properties.length > 0) {
+        whereConditions.AND.push({
+          property_id: { in: user.assigned_properties },
+        });
+      } else {
+        // If no assigned properties, check departments
+        const userDepartments = await prisma.userDepartment.findMany({
+          where: { userId: user.id },
+          select: { departmentId: true },
+        });
+
+        const departmentIds = userDepartments.map((dept) => dept.departmentId);
+
+        whereConditions.AND.push({
+          department_id: { in: departmentIds },
+        });
+      }
+    }
 
     if (by_me) {
       whereConditions.created_by = user.id;
@@ -135,5 +160,19 @@ export const getAllTickets = async (
     });
   } catch (error: any) {
     next(createError(500, error.message || "Failed to retrieve tickets"));
+  }
+};
+
+export const updateTicket = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+    
+
+  } catch (error: any) {
+    next(createError(500, error || "Failed to update ticket"));
   }
 };

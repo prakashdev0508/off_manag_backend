@@ -19,8 +19,9 @@ model User {
   external_id    String
   manager_id     String?
 
-  user_type UserType @default(employee)
-  roles     Role[]
+  user_type           UserType @default(employee)
+  roles               Role[]
+  assigned_properties Int[]
 
   is_active Boolean @default(true)
 
@@ -110,11 +111,11 @@ model Ticket {
   priority TicketPriority @default(medium)
   category TicketCategory @default(other)
 
-  property_id Int?
-  city_name   String?
-  cluster_id  Int?
-  attachments String[]
-  history     TicketHistory[]
+  property_id    Int?
+  city_name      String?
+  cluster_id     Int?
+  attachments    String[]
+  history        TicketHistory[]
   external_links String[]
 
   created_by      Int

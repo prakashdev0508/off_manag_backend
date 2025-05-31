@@ -9,8 +9,15 @@ export const updateUser = async (
   next: NextFunction
 ) => {
   try {
-    const { email, name, departments, roles, user_type, isActive } =
-      updateUserSchema.parse(req.body);
+    const {
+      email,
+      name,
+      departments,
+      roles,
+      user_type,
+      isActive,
+      assigned_properties,
+    } = updateUserSchema.parse(req.body);
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -39,6 +46,9 @@ export const updateUser = async (
             })),
           },
         }),
+        ...(assigned_properties && {
+          assigned_properties: assigned_properties.map(Number),
+        }),
       },
       include: {
         departments: {
@@ -54,3 +64,4 @@ export const updateUser = async (
     return next(createError(500, error));
   }
 };
+

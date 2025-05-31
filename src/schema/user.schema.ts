@@ -8,5 +8,6 @@ export const updateUserSchema = z.object({
     roles: z.array(z.nativeEnum(Role)).optional(),
     user_type: z.nativeEnum(UserType).optional(),
     isActive: z.boolean().optional(),
+    assigned_properties: z.array(z.number()).optional(),
 })
 
