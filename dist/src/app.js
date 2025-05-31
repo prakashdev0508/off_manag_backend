@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = void 0;
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
@@ -33,14 +32,22 @@ exports.app.use((0, helmet_1.default)({
     },
 }));
 // CORS configuration
-exports.app.use((0, cors_1.default)({
-    origin: true,
-    methods: "*",
-    allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
-    exposedHeaders: ["Content-Range", "X-Content-Range"],
-    credentials: true,
-    maxAge: 86400,
-}));
+// app.use(
+//   cors({
+//     origin: true,
+//     methods: "*",
+//     allowedHeaders: [
+//       "Content-Type",
+//       "Authorization",
+//       "Accept",
+//       "Origin",
+//       "X-Requested-With",
+//     ],
+//     exposedHeaders: ["Content-Range", "X-Content-Range"],
+//     credentials: true,
+//     maxAge: 86400,
+//   })
+// );
 // Rate limiting
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"),
@@ -66,7 +73,7 @@ exports.app.get("/health", async (req, res) => {
             (0, healthCheck_1.socketHealthCheck)(),
         ]);
         res.status(200).json({
-            status: 'ok',
+            status: "ok",
             timestamp: new Date().toISOString(),
             services: {
                 database: dbStatus,
@@ -78,8 +85,8 @@ exports.app.get("/health", async (req, res) => {
     }
     catch (error) {
         res.status(500).json({
-            status: 'error',
-            message: 'Health check failed',
+            status: "error",
+            message: "Health check failed",
             error: error.message,
         });
     }

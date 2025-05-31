@@ -8,7 +8,12 @@ import { config } from "dotenv";
 import { validateEnv } from "./config/validateEnv";
 import { stream } from "./config/logger";
 import { errorHandler } from "./middleware/errorHandler";
-import { checkDatabase, checkRedis, socketHealthCheck, getSystemInfo } from "./services/healthCheck";
+import {
+  checkDatabase,
+  checkRedis,
+  socketHealthCheck,
+  getSystemInfo,
+} from "./services/healthCheck";
 import router from "./routes";
 
 // Load environment variables
@@ -34,16 +39,22 @@ app.use(
 );
 
 // CORS configuration
-app.use(
-  cors({
-    origin: true,
-    methods: "*",
-    allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
-    exposedHeaders: ["Content-Range", "X-Content-Range"],
-    credentials: true,
-    maxAge: 86400,
-  })
-);
+// app.use(
+//   cors({
+//     origin: true,
+//     methods: "*",
+//     allowedHeaders: [
+//       "Content-Type",
+//       "Authorization",
+//       "Accept",
+//       "Origin",
+//       "X-Requested-With",
+//     ],
+//     exposedHeaders: ["Content-Range", "X-Content-Range"],
+//     credentials: true,
+//     maxAge: 86400,
+//   })
+// );
 
 // Rate limiting
 const limiter = rateLimit({
@@ -68,14 +79,14 @@ app.get("/", (req, res) => {
 //health check
 app.get("/health", async (req, res) => {
   try {
-    const [dbStatus, redisStatus , socketStatus] = await Promise.all([
+    const [dbStatus, redisStatus, socketStatus] = await Promise.all([
       checkDatabase(),
       checkRedis(),
       socketHealthCheck(),
-    ]); 
+    ]);
 
     res.status(200).json({
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
       services: {
         database: dbStatus,
@@ -84,10 +95,10 @@ app.get("/health", async (req, res) => {
       },
       system: getSystemInfo(),
     });
-  } catch (error : any) {
+  } catch (error: any) {
     res.status(500).json({
-      status: 'error',
-      message: 'Health check failed',
+      status: "error",
+      message: "Health check failed",
       error: error.message,
     });
   }
